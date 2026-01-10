@@ -1,0 +1,44 @@
+# =============================================================================
+# SSH Config
+# =============================================================================
+# Machine-specific config goes in ~/.ssh/config_local (not tracked)
+# This file contains shared settings for all machines
+
+# Include machine-specific config first (takes precedence)
+Include config_local
+
+# -----------------------------------------------------------------------------
+# Default settings for all hosts
+# -----------------------------------------------------------------------------
+Host *
+    # Forward SSH agent to remote machines
+    ForwardAgent yes
+
+    # Keep connections alive
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+
+    # Use 1Password SSH agent (macOS)
+    # Comment this out on Linux or if not using 1Password
+    IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+
+    # Security
+    HashKnownHosts no
+    AddKeysToAgent yes
+
+    # Performance
+    Compression no
+
+# -----------------------------------------------------------------------------
+# Common hosts (add your servers here)
+# -----------------------------------------------------------------------------
+# Example:
+# Host myserver
+#     HostName server.example.com
+#     User deploy
+#     Port 22
+
+# GitHub
+Host github.com
+    HostName github.com
+    User git

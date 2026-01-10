@@ -1,0 +1,10 @@
+[tools]
+node = "lts"
+go = "latest"
+# Uncomment as needed:
+# python = "latest"
+# ruby = "latest"
+# rust = "latest"
+
+[settings]
+experimental = true

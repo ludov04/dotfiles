@@ -1,0 +1,26 @@
+#!/bin/bash
+# =============================================================================
+# Update everything - brew, mise, tldr, etc.
+# Run: update-all
+# =============================================================================
+set -e
+
+echo "==> Updating Homebrew..."
+brew update
+brew upgrade
+brew cleanup
+
+echo ""
+echo "==> Updating mise tools..."
+mise upgrade
+
+echo ""
+echo "==> Updating tldr pages..."
+tldr --update 2>/dev/null || true
+
+echo ""
+echo "==> Updating tmux plugins..."
+~/.tmux/plugins/tpm/bin/update_plugins all 2>/dev/null || true
+
+echo ""
+echo "==> Done!"

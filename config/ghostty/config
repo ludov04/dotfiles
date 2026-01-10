@@ -1,0 +1,53 @@
+# =============================================================================
+# Ghostty Terminal Configuration
+# Docs: https://ghostty.org/docs/config
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Font
+# -----------------------------------------------------------------------------
+font-family = "MesloLGS NF"
+font-size = 14
+
+# -----------------------------------------------------------------------------
+# Theme
+# -----------------------------------------------------------------------------
+theme = catppuccin-mocha
+
+# -----------------------------------------------------------------------------
+# Window
+# -----------------------------------------------------------------------------
+window-padding-x = 10
+window-padding-y = 10
+window-decoration = true
+macos-titlebar-style = tabs
+confirm-close-surface = false
+
+# -----------------------------------------------------------------------------
+# Behavior
+# -----------------------------------------------------------------------------
+copy-on-select = clipboard
+mouse-hide-while-typing = true
+shell-integration = zsh
+
+# -----------------------------------------------------------------------------
+# Keybindings
+# -----------------------------------------------------------------------------
+# Cmd+K to clear screen
+keybind = super+k=clear_screen
+
+# Cmd+T for new tab
+keybind = super+t=new_tab
+
+# Cmd+W to close tab
+keybind = super+w=close_surface
+
+# Cmd+N for new window
+keybind = super+n=new_window
+
+# Navigate tabs with Cmd+1-9
+keybind = super+1=goto_tab:1
+keybind = super+2=goto_tab:2
+keybind = super+3=goto_tab:3
+keybind = super+4=goto_tab:4
+keybind = super+5=goto_tab:5

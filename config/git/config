@@ -1,0 +1,65 @@
+[user]
+    name = Ludovic Vannoorenberghe
+    email = ludovic.v@me.com
+    signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN/vTzT7hRPxNoVsxMo8TCJbCSSuG13Z3gHApixtRFv3
+
+[commit]
+    gpgsign = true
+
+[gpg]
+    format = ssh
+
+[gpg "ssh"]
+    program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+
+[init]
+    defaultBranch = main
+
+[core]
+    editor = code --wait
+    autocrlf = input
+
+[pull]
+    rebase = true
+
+[rebase]
+    autoStash = true
+
+[alias]
+    st = status
+    co = checkout
+    br = branch
+    ci = commit
+    unstage = reset HEAD --
+    last = log -1 HEAD
+    lg = log --oneline --graph --decorate -20
+
+# -----------------------------------------------------------------------------
+# Delta - beautiful diffs (used by default for git diff, log, show, blame)
+# -----------------------------------------------------------------------------
+[core]
+    pager = delta
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true          # Use n/N to jump between diff sections
+    side-by-side = true      # Side-by-side view
+    line-numbers = true      # Show line numbers
+    syntax-theme = Dracula   # Color theme
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default
+
+# -----------------------------------------------------------------------------
+# Difftastic - syntax-aware diffs (use with: git difftool)
+# -----------------------------------------------------------------------------
+[difftool]
+    prompt = false
+
+[difftool "difftastic"]
+    cmd = difft "$LOCAL" "$REMOTE"

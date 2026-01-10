@@ -1,0 +1,33 @@
+#!/bin/bash
+# =============================================================================
+# Enable Touch ID for sudo on macOS
+# Run: sudo ~/dotfiles/bin/macos-touchid-sudo
+# Note: Needs to be re-run after macOS updates
+# =============================================================================
+set -e
+
+PAM_FILE="/etc/pam.d/sudo"
+PAM_TID="auth       sufficient     pam_tid.so"
+PAM_REATTACH="auth       optional       /opt/homebrew/lib/pam/pam_reattach.so"
+
+# Check if already enabled
+if grep -q "pam_tid.so" "$PAM_FILE" 2>/dev/null; then
+    echo "Touch ID for sudo is already enabled!"
+    exit 0
+fi
+
+# Backup original
+BACKUP="${PAM_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+echo "Backing up $PAM_FILE to $BACKUP"
+cp "$PAM_FILE" "$BACKUP"
+
+# Add Touch ID support
+# pam_reattach is needed for tmux compatibility
+echo "Enabling Touch ID for sudo..."
+sed -i '' "1a\\
+$PAM_REATTACH\\
+$PAM_TID
+" "$PAM_FILE"
+
+echo "Done! Touch ID for sudo is now enabled."
+echo "Test it: sudo -v"

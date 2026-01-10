@@ -1,0 +1,15 @@
+#!/bin/bash
+# =============================================================================
+# Show what's running on which ports
+# Run: ports [port_number]
+# =============================================================================
+
+if [ -n "$1" ]; then
+    # Show specific port
+    echo "Processes on port $1:"
+    lsof -i ":$1" 2>/dev/null || echo "Nothing running on port $1"
+else
+    # Show all listening ports
+    echo "Listening ports:"
+    lsof -iTCP -sTCP:LISTEN -P -n | awk 'NR==1 || /LISTEN/' | column -t
+fi

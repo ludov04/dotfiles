@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+*.swp
+*~
+
+# Secrets (never commit these)
+*.pem
+*.key
+.env
+.env.*
+
+# These files contain secrets - set up manually on each machine:
+# ~/.npmrc           - npm registry tokens
+# ~/.boto            - GCP credentials
+# ~/.aws/credentials - AWS credentials (use SSO instead)
+# ~/.ssh/id_*        - SSH private keys (use 1Password)
