@@ -59,7 +59,7 @@ aws sso login
 
 # SSH - copy the base config, then add machine-specific hosts
 cp ~/dotfiles/config/ssh/config ~/.ssh/config
-# Coder/VSCode will auto-add their sections
+
 ```
 
 ## Customization
