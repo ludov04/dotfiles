@@ -68,7 +68,6 @@ brew "ffmpeg"         # Video/audio processing
 cask "1password"
 cask "1password-cli"
 cask "arc"
-cask "claude-code"
 cask "discord"
 cask "docker"
 cask "ghostty"
