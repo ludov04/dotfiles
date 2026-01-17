@@ -23,7 +23,8 @@ mkdir -p "$HOME/.cache/zsh"
 backup_if_exists() {
     if [[ -e "$1" && ! -L "$1" ]]; then
         echo "    Backing up $1 to $1.backup"
-        mv "$1" "$1.backup"
+        rm -rf "$1.backup"
+        mv -f "$1" "$1.backup"
     fi
 }
 
@@ -33,6 +34,7 @@ backup_if_exists "$HOME/.zshrc"
 backup_if_exists "$HOME/.config/zsh"
 backup_if_exists "$HOME/.config/git"
 backup_if_exists "$HOME/.config/mise"
+backup_if_exists "$HOME/.config/ghostty"
 backup_if_exists "$HOME/.config/starship.toml"
 backup_if_exists "$HOME/.tmux.conf"
 backup_if_exists "$HOME/.config/tmux"
@@ -49,6 +51,7 @@ rm -rf "$HOME/.config/git"
 rm -rf "$HOME/.config/mise"
 rm -f "$HOME/.config/starship.toml"
 rm -f "$HOME/.tmux.conf"
+rm -rf "$HOME/.config/ghostty"
 rm -rf "$HOME/.config/tmux"
 
 # Create new symlinks
@@ -56,6 +59,7 @@ ln -sf "$DOTFILES/home/.zshenv" "$HOME/.zshenv"
 ln -sf "$DOTFILES/config/zsh" "$HOME/.config/zsh"
 ln -sf "$DOTFILES/config/git" "$HOME/.config/git"
 ln -sf "$DOTFILES/config/mise" "$HOME/.config/mise"
+ln -sf "$DOTFILES/config/ghostty" "$HOME/.config/ghostty"
 ln -sf "$DOTFILES/config/starship.toml" "$HOME/.config/starship.toml"
 
 # tmux config (both locations for compatibility)
