@@ -63,6 +63,12 @@ brew "aichat"         # AI chat CLI
 brew "ffmpeg"         # Video/audio processing
 
 # -----------------------------------------------------------------------------
+# Fonts (Nerd Fonts for terminal icons)
+# -----------------------------------------------------------------------------
+cask "font-jetbrains-mono-nerd-font"
+cask "font-fira-code-nerd-font"
+
+# -----------------------------------------------------------------------------
 # GUI Applications (Casks)
 # -----------------------------------------------------------------------------
 cask "1password"
@@ -82,6 +88,7 @@ cask "telegram"
 cask "visual-studio-code"
 cask "vlc"
 cask "zoom"
+
 
 # Google Cloud (uncomment if needed)
 # cask "google-cloud-sdk"
