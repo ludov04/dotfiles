@@ -14,3 +14,5 @@
 # ~/.boto            - GCP credentials
 # ~/.aws/credentials - AWS credentials (use SSO instead)
 # ~/.ssh/id_*        - SSH private keys (use 1Password)
+
+config/zsh/.zcompdump
