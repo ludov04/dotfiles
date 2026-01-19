@@ -64,3 +64,12 @@ if [[ -f "$HOME/.config/op/plugins.sh" ]]; then
     source "$HOME/.config/op/plugins.sh"
 fi
 export PATH="$HOME/.local/bin:$PATH"
+
+# pnpm
+export PNPM_HOME="/Users/ludov/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+

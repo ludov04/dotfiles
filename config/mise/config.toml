@@ -2,6 +2,7 @@
 node = "lts"
 go = "latest"
 bun = "latest"
+uv = "latest"
 # Uncomment as needed:
 # python = "latest"
 # ruby = "latest"
