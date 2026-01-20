@@ -1,11 +1,8 @@
 # =============================================================================
-# SSH Config
+# SSH Config (Shared Settings)
 # =============================================================================
-# Machine-specific config goes in ~/.ssh/config_local (not tracked)
-# This file contains shared settings for all machines
-
-# Include machine-specific config first (takes precedence)
-Include config_local
+# This file is included by ~/.ssh/config and contains shared settings.
+# Machine-specific hosts and auto-generated blocks stay in ~/.ssh/config.
 
 # -----------------------------------------------------------------------------
 # Default settings for all hosts

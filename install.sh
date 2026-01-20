@@ -84,6 +84,38 @@ done
 echo "    ~/.claude/CLAUDE.md -> $DOTFILES/config/claude/CLAUDE.md"
 echo "    ~/.claude/commands/ -> $DOTFILES/config/claude/commands/"
 
+# SSH config (include dotfiles config, keep machine-specific blocks in place)
+mkdir -p "$HOME/.ssh"
+chmod 700 "$HOME/.ssh"
+SSH_INCLUDE="Include $DOTFILES/config/ssh/config"
+if [[ ! -f "$HOME/.ssh/config" ]]; then
+    # Create new config with include
+    cat > "$HOME/.ssh/config" << EOF
+# =============================================================================
+# SSH Config
+# =============================================================================
+# Include shared settings from dotfiles
+$SSH_INCLUDE
+
+# -----------------------------------------------------------------------------
+# Machine-specific hosts and auto-generated blocks below
+# -----------------------------------------------------------------------------
+EOF
+    echo "    Created ~/.ssh/config with Include"
+elif ! grep -q "Include.*dotfiles.*ssh" "$HOME/.ssh/config"; then
+    # Add include to existing config
+    {
+        echo "# Include shared settings from dotfiles"
+        echo "$SSH_INCLUDE"
+        echo ""
+        cat "$HOME/.ssh/config"
+    } > "$HOME/.ssh/config.tmp"
+    mv "$HOME/.ssh/config.tmp" "$HOME/.ssh/config"
+    echo "    Added Include to existing ~/.ssh/config"
+else
+    echo "    ~/.ssh/config already includes dotfiles"
+fi
+
 # -----------------------------------------------------------------------------
 # macOS specific setup
 # -----------------------------------------------------------------------------

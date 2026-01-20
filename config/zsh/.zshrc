@@ -58,6 +58,13 @@ if [[ -f /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-hi
 fi
 
 # -----------------------------------------------------------------------------
+# 1Password SSH agent (for agent forwarding to work)
+# -----------------------------------------------------------------------------
+if [[ -S "$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock" ]]; then
+    export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+fi
+
+# -----------------------------------------------------------------------------
 # 1Password CLI plugin (if exists)
 # -----------------------------------------------------------------------------
 if [[ -f "$HOME/.config/op/plugins.sh" ]]; then
