@@ -1,5 +1,5 @@
 # =============================================================================
-# SSH Config (Shared Settings)
+# SSH Config (Shared Settings) - managed by chezmoi
 # =============================================================================
 # This file is included by ~/.ssh/config and contains shared settings.
 # Machine-specific hosts and auto-generated blocks stay in ~/.ssh/config.
@@ -15,9 +15,10 @@ Host *
     ServerAliveInterval 60
     ServerAliveCountMax 3
 
+{{- if .has1Password }}
     # Use 1Password SSH agent (macOS)
-    # Comment this out on Linux or if not using 1Password
     IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+{{- end }}
 
     # Security
     HashKnownHosts no
@@ -27,14 +28,8 @@ Host *
     Compression no
 
 # -----------------------------------------------------------------------------
-# Common hosts (add your servers here)
+# Common hosts
 # -----------------------------------------------------------------------------
-# Example:
-# Host myserver
-#     HostName server.example.com
-#     User deploy
-#     Port 22
-
 # GitHub
 Host github.com
     HostName github.com

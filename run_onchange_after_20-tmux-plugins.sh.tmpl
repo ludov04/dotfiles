@@ -1,0 +1,10 @@
+#!/bin/bash
+# =============================================================================
+# Install tmux plugins when tmux.conf changes
+# Hash: {{ include "dot_config/tmux/tmux.conf.tmpl" | sha256sum }}
+# =============================================================================
+
+if [[ -f "$HOME/.tmux/plugins/tpm/bin/install_plugins" ]]; then
+    echo "==> Installing tmux plugins..."
+    "$HOME/.tmux/plugins/tpm/bin/install_plugins"
+fi

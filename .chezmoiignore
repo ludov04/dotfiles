@@ -1,0 +1,21 @@
+# Ignore repo files that shouldn't be deployed
+README.md
+LICENSE
+.git/**
+.gitignore
+Brewfile
+install.sh
+install.sh.old
+install-remote.sh.old
+
+# macOS-only configs (ignore on Linux)
+{{- if not .isMacOS }}
+.config/ghostty/**
+.local/bin/macos-defaults
+.local/bin/macos-touchid-sudo
+{{- end }}
+
+# Devpod: use devcontainer features instead of mise
+{{- if .isDevpod }}
+.config/mise/**
+{{- end }}

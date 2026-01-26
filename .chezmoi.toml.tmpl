@@ -1,0 +1,15 @@
+{{- /* Environment detection */ -}}
+{{- $isDevpod := env "DEVPOD" | not | not -}}
+{{- $isMacOS := eq .chezmoi.os "darwin" -}}
+{{- $isLinux := eq .chezmoi.os "linux" -}}
+
+[data]
+    isDevpod = {{ $isDevpod }}
+    isMacOS = {{ $isMacOS }}
+    isLinux = {{ $isLinux }}
+
+    # Feature flags based on environment
+    hasHomebrew = {{ and $isMacOS (not $isDevpod) }}
+    has1Password = {{ and $isMacOS (not $isDevpod) }}
+    hasGui = {{ and $isMacOS (not $isDevpod) }}
+    hasMise = {{ not $isDevpod }}

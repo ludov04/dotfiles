@@ -1,12 +1,4 @@
 {
-  "theme": "dark-ansi",
-  "model": "opus",
-  "enabledPlugins": {
-    "frontend-design@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true,
-    "claude-mem@thedotmack": true
-  },
-  "syntaxHighlightingDisabled": false,
   "hooks": {
     "SessionStart": [
       {
@@ -22,5 +14,13 @@
   "statusLine": {
     "type": "command",
     "command": "node \"$HOME/.claude/hooks/statusline.js\""
-  }
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "claude-mem@thedotmack": true
+  },
+  "syntaxHighlightingDisabled": false,
+  "theme": "dark-ansi",
+  "model": "opus"
 }

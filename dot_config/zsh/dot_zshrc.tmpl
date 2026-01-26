@@ -1,26 +1,29 @@
 # =============================================================================
-# ZSH Configuration
+# ZSH Configuration (managed by chezmoi)
 # =============================================================================
 
 # -----------------------------------------------------------------------------
 # PATH additions
 # -----------------------------------------------------------------------------
-# Dotfiles bin directory
-export PATH="$HOME/dotfiles/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
+{{- if .hasHomebrew }}
 # -----------------------------------------------------------------------------
 # Homebrew (must be first for PATH)
 # -----------------------------------------------------------------------------
 if [[ -f /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
+{{- end }}
 
+{{- if .hasMise }}
 # -----------------------------------------------------------------------------
 # mise (version manager for node, go, python, etc.)
 # -----------------------------------------------------------------------------
 if command -v mise &>/dev/null; then
     eval "$(mise activate zsh)"
 fi
+{{- end }}
 
 # -----------------------------------------------------------------------------
 # Prompt (Starship)
@@ -44,6 +47,7 @@ fi
 # 4. Functions
 [[ -f "$ZDOTDIR/functions.zsh" ]] && source "$ZDOTDIR/functions.zsh"
 
+{{- if .hasHomebrew }}
 # -----------------------------------------------------------------------------
 # Zsh plugins (via Homebrew) - AFTER completions.zsh sets strategies
 # -----------------------------------------------------------------------------
@@ -56,7 +60,27 @@ fi
 if [[ -f /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
     source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 fi
+{{- else }}
+# -----------------------------------------------------------------------------
+# Zsh plugins (Linux locations)
+# -----------------------------------------------------------------------------
+# Try common Linux plugin locations
+for dir in /usr/share /usr/local/share "$HOME/.local/share"; do
+    if [[ -f "$dir/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+        source "$dir/zsh-autosuggestions/zsh-autosuggestions.zsh"
+        break
+    fi
+done
 
+for dir in /usr/share /usr/local/share "$HOME/.local/share"; do
+    if [[ -f "$dir/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+        source "$dir/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+        break
+    fi
+done
+{{- end }}
+
+{{- if .has1Password }}
 # -----------------------------------------------------------------------------
 # 1Password SSH agent (for agent forwarding to work)
 # -----------------------------------------------------------------------------
@@ -70,13 +94,11 @@ fi
 if [[ -f "$HOME/.config/op/plugins.sh" ]]; then
     source "$HOME/.config/op/plugins.sh"
 fi
-export PATH="$HOME/.local/bin:$PATH"
+{{- end }}
 
 # pnpm
-export PNPM_HOME="/Users/ludov/.local/share/pnpm"
+export PNPM_HOME="{{ .chezmoi.homeDir }}/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
-# pnpm end
-

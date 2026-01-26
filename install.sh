@@ -1,169 +1,44 @@
 #!/bin/bash
 # =============================================================================
-# Dotfiles Install Script (Full - macOS)
+# Dotfiles Bootstrap Script
+# =============================================================================
+# This script is for initial setup and devpod/container compatibility.
+# Devpod clones the dotfiles repo and runs install.sh automatically.
+#
+# Usage:
+#   ./install.sh              # Install from local repo
+#   curl ... | sh             # One-liner bootstrap (see README)
 # =============================================================================
 set -e
 
-DOTFILES="${DOTFILES:-$HOME/dotfiles}"
+DOTFILES_REPO="https://github.com/ludov/dotfiles.git"
 
-echo "==> Installing dotfiles from $DOTFILES"
+echo "==> Bootstrapping dotfiles with chezmoi..."
 
-# -----------------------------------------------------------------------------
-# Create XDG directories
-# -----------------------------------------------------------------------------
-echo "==> Creating XDG directories"
-mkdir -p "$HOME/.config"
-mkdir -p "$HOME/.local/share"
-mkdir -p "$HOME/.local/state/zsh"
-mkdir -p "$HOME/.cache/zsh"
+# Install chezmoi if not present
+if ! command -v chezmoi &>/dev/null; then
+    echo "==> Installing chezmoi..."
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+    export PATH="$HOME/.local/bin:$PATH"
+fi
 
-# -----------------------------------------------------------------------------
-# Backup existing configs
-# -----------------------------------------------------------------------------
-backup_if_exists() {
-    if [[ -e "$1" && ! -L "$1" ]]; then
-        echo "    Backing up $1 to $1.backup"
-        rm -rf "$1.backup"
-        mv -f "$1" "$1.backup"
-    fi
-}
-
-echo "==> Backing up existing configs (if any)"
-backup_if_exists "$HOME/.zshenv"
-backup_if_exists "$HOME/.zshrc"
-backup_if_exists "$HOME/.config/zsh"
-backup_if_exists "$HOME/.config/git"
-backup_if_exists "$HOME/.config/mise"
-backup_if_exists "$HOME/.config/ghostty"
-backup_if_exists "$HOME/.config/starship.toml"
-backup_if_exists "$HOME/.tmux.conf"
-backup_if_exists "$HOME/.config/tmux"
-
-# -----------------------------------------------------------------------------
-# Create symlinks
-# -----------------------------------------------------------------------------
-echo "==> Creating symlinks"
-
-# Remove old symlinks first
-rm -f "$HOME/.zshenv"
-rm -rf "$HOME/.config/zsh"
-rm -rf "$HOME/.config/git"
-rm -rf "$HOME/.config/mise"
-rm -f "$HOME/.config/starship.toml"
-rm -f "$HOME/.tmux.conf"
-rm -rf "$HOME/.config/ghostty"
-rm -rf "$HOME/.config/tmux"
-
-# Create new symlinks
-ln -sf "$DOTFILES/home/.zshenv" "$HOME/.zshenv"
-ln -sf "$DOTFILES/config/zsh" "$HOME/.config/zsh"
-ln -sf "$DOTFILES/config/git" "$HOME/.config/git"
-ln -sf "$DOTFILES/config/mise" "$HOME/.config/mise"
-ln -sf "$DOTFILES/config/ghostty" "$HOME/.config/ghostty"
-ln -sf "$DOTFILES/config/starship.toml" "$HOME/.config/starship.toml"
-
-# tmux config (both locations for compatibility)
-mkdir -p "$HOME/.config/tmux"
-ln -sf "$DOTFILES/config/tmux/tmux.conf" "$HOME/.config/tmux/tmux.conf"
-ln -sf "$DOTFILES/config/tmux/tmux.conf" "$HOME/.tmux.conf"
-
-echo "    ~/.zshenv -> $DOTFILES/home/.zshenv"
-echo "    ~/.config/zsh -> $DOTFILES/config/zsh"
-echo "    ~/.config/git -> $DOTFILES/config/git"
-echo "    ~/.config/mise -> $DOTFILES/config/mise"
-echo "    ~/.config/starship.toml -> $DOTFILES/config/starship.toml"
-echo "    ~/.config/tmux/tmux.conf -> $DOTFILES/config/tmux/tmux.conf"
-
-# Claude Code config
-mkdir -p "$HOME/.claude/commands"
-ln -sf "$DOTFILES/config/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-ln -sf "$DOTFILES/config/claude/settings.json" "$HOME/.claude/settings.json"
-for cmd in "$DOTFILES/config/claude/commands"/*.md; do
-    ln -sf "$cmd" "$HOME/.claude/commands/$(basename "$cmd")"
-done
-echo "    ~/.claude/CLAUDE.md -> $DOTFILES/config/claude/CLAUDE.md"
-echo "    ~/.claude/commands/ -> $DOTFILES/config/claude/commands/"
-
-# SSH config (include dotfiles config, keep machine-specific blocks in place)
-mkdir -p "$HOME/.ssh"
-chmod 700 "$HOME/.ssh"
-SSH_INCLUDE="Include $DOTFILES/config/ssh/config"
-if [[ ! -f "$HOME/.ssh/config" ]]; then
-    # Create new config with include
-    cat > "$HOME/.ssh/config" << EOF
-# =============================================================================
-# SSH Config
-# =============================================================================
-# Include shared settings from dotfiles
-$SSH_INCLUDE
-
-# -----------------------------------------------------------------------------
-# Machine-specific hosts and auto-generated blocks below
-# -----------------------------------------------------------------------------
-EOF
-    echo "    Created ~/.ssh/config with Include"
-elif ! grep -q "Include.*dotfiles.*ssh" "$HOME/.ssh/config"; then
-    # Add include to existing config
-    {
-        echo "# Include shared settings from dotfiles"
-        echo "$SSH_INCLUDE"
-        echo ""
-        cat "$HOME/.ssh/config"
-    } > "$HOME/.ssh/config.tmp"
-    mv "$HOME/.ssh/config.tmp" "$HOME/.ssh/config"
-    echo "    Added Include to existing ~/.ssh/config"
+# Determine source directory
+if [[ -f "$(pwd)/.chezmoi.toml.tmpl" ]]; then
+    # Running from within the cloned repo (devpod scenario)
+    CHEZMOI_SOURCE="$(pwd)"
+    echo "==> Using local source: $CHEZMOI_SOURCE"
+    chezmoi init --apply --source="$CHEZMOI_SOURCE"
 else
-    echo "    ~/.ssh/config already includes dotfiles"
+    # Running standalone, clone from remote
+    echo "==> Cloning from: $DOTFILES_REPO"
+    chezmoi init --apply "$DOTFILES_REPO"
 fi
 
-# -----------------------------------------------------------------------------
-# macOS specific setup
-# -----------------------------------------------------------------------------
-if [[ "$(uname)" == "Darwin" ]]; then
-    echo "==> macOS detected"
-
-    # Install Homebrew if not present
-    if ! command -v brew &>/dev/null; then
-        echo "==> Installing Homebrew"
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    fi
-
-    # Install packages from Brewfile
-    if [[ -f "$DOTFILES/Brewfile" ]]; then
-        echo "==> Installing Homebrew packages"
-        brew bundle --file="$DOTFILES/Brewfile" --no-lock
-    fi
-
-    # Setup mise
-    if command -v mise &>/dev/null; then
-        echo "==> Setting up mise"
-        eval "$(mise activate bash)"
-        mise install --yes
-    fi
-fi
-
-# -----------------------------------------------------------------------------
-# tmux plugin manager
-# -----------------------------------------------------------------------------
-if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
-    echo "==> Installing tmux plugin manager"
-    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-fi
-
-# Install tmux plugins
-if [[ -f "$HOME/.tmux/plugins/tpm/bin/install_plugins" ]]; then
-    echo "==> Installing tmux plugins"
-    ~/.tmux/plugins/tpm/bin/install_plugins
-fi
-
-# -----------------------------------------------------------------------------
-# Done
-# -----------------------------------------------------------------------------
 echo ""
 echo "==> Done! Restart your shell or run: exec zsh"
 echo ""
-echo "Next steps:"
-echo "  1. Open a new terminal"
-echo "  2. Run 'mise install' to install language versions"
-echo "  3. Customize configs in $DOTFILES"
+echo "Chezmoi commands:"
+echo "  chezmoi diff     # See pending changes"
+echo "  chezmoi apply    # Apply changes"
+echo "  chezmoi edit     # Edit source files"
+echo "  chezmoi cd       # Go to source directory"

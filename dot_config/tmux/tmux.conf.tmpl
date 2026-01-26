@@ -1,5 +1,5 @@
 # =============================================================================
-# TMUX Configuration - Beginner Friendly
+# TMUX Configuration - Beginner Friendly (managed by chezmoi)
 # =============================================================================
 #
 # QUICK START:
@@ -134,8 +134,15 @@ setw -g mode-keys vi
 # Enter copy mode with prefix + [
 # v to start selection, y to yank, q to quit
 bind -T copy-mode-vi v send-keys -X begin-selection
+{{- if .isMacOS }}
+# macOS clipboard
 bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
 bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy"
+{{- else }}
+# Linux clipboard (xclip for X11, wl-copy for Wayland)
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -selection clipboard 2>/dev/null || wl-copy"
+bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "xclip -selection clipboard 2>/dev/null || wl-copy"
+{{- end }}
 
 # Paste with prefix + P
 bind P paste-buffer

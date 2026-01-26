@@ -4,7 +4,7 @@
 # =============================================================================
 
 # Taps
-tap "homebrew/bundle"
+# Note: homebrew/bundle is now built-in, no tap needed
 
 # -----------------------------------------------------------------------------
 # Core CLI Tools
@@ -75,15 +75,15 @@ cask "1password"
 cask "1password-cli"
 cask "arc"
 cask "discord"
-cask "docker"
+cask "docker-desktop"
 cask "ghostty"
 cask "linear-linear"
 cask "notion"
 cask "raycast"
 cask "rectangle"
 cask "slack"
-cask "syncthing"
-cask "tailscale"
+cask "syncthing-app"
+cask "tailscale-app"
 cask "telegram"
 cask "visual-studio-code"
 cask "vlc"
