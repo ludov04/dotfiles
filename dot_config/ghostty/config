@@ -13,7 +13,7 @@ font-size = 14
 # Theme
 # -----------------------------------------------------------------------------
 theme = catppuccin-frappe
-background-opacity = 0.9
+background-opacity = 0.97
 
 macos-icon = retro
 
