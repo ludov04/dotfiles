@@ -87,18 +87,46 @@ if ! command -v zoxide &>/dev/null; then
     curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
 fi
 
+# Detect architecture
+ARCH=$(uname -m)
+case "$ARCH" in
+    x86_64)  ARCH_ALT="x86_64"; ARCH_GO="amd64" ;;
+    aarch64) ARCH_ALT="aarch64"; ARCH_GO="arm64" ;;
+    arm64)   ARCH_ALT="aarch64"; ARCH_GO="arm64" ;;
+    *)       ARCH_ALT="$ARCH"; ARCH_GO="$ARCH" ;;
+esac
+
 # Install eza (modern ls)
 if ! command -v eza &>/dev/null; then
     echo "==> Installing eza..."
     EZA_VERSION=$(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep tag_name | cut -d '"' -f 4)
-    curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz" | tar xz -C "$HOME/.local/bin"
+    curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_${ARCH_ALT}-unknown-linux-gnu.tar.gz" | tar xz -C "$HOME/.local/bin" 2>/dev/null || {
+        echo "==> eza binary not available for $ARCH, skipping"
+    }
 fi
 
 # Install lazygit
 if ! command -v lazygit &>/dev/null; then
     echo "==> Installing lazygit..."
     LAZYGIT_VERSION=$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
-    curl -sL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" | tar xz -C "$HOME/.local/bin" lazygit
+    LAZYGIT_ARCH=$([ "$ARCH" = "x86_64" ] && echo "x86_64" || echo "arm64")
+    curl -sL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_${LAZYGIT_ARCH}.tar.gz" | tar xz -C "$HOME/.local/bin" lazygit 2>/dev/null || {
+        echo "==> lazygit binary not available for $ARCH, skipping"
+    }
+fi
+
+# Install GitHub CLI
+if ! command -v gh &>/dev/null; then
+    echo "==> Installing GitHub CLI..."
+    curl -sL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+    sudo apt-get update -qq && sudo apt-get install -y gh
+fi
+
+# Install direnv
+if ! command -v direnv &>/dev/null; then
+    echo "==> Installing direnv..."
+    curl -sfL https://direnv.net/install.sh | bash
 fi
 
 # Set zsh as default shell if available
