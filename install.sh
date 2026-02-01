@@ -11,7 +11,7 @@
 # =============================================================================
 set -e
 
-DOTFILES_REPO="https://github.com/ludov/dotfiles.git"
+DOTFILES_REPO="git@github.com:ludov04/dotfiles.git"
 
 echo "==> Bootstrapping dotfiles with chezmoi..."
 
