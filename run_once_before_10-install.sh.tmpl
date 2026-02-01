@@ -29,7 +29,9 @@ fi
 # Install from Brewfile
 if [[ -f "{{ .chezmoi.sourceDir }}/Brewfile" ]]; then
     echo "==> Installing Homebrew packages..."
-    brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
+    brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile" || {
+        echo "==> Some packages failed to install (continuing anyway)"
+    }
 fi
 {{- end }}
 
