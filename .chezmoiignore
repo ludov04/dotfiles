@@ -15,7 +15,7 @@ install-remote.sh.old
 .local/bin/macos-touchid-sudo
 {{- end }}
 
-# Devpod: use devcontainer features instead of mise
-{{- if .isDevpod }}
+# Remote: use devcontainer features instead of mise
+{{- if .isRemote }}
 .config/mise/**
 {{- end }}
