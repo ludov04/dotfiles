@@ -94,6 +94,13 @@ if ! command -v eza &>/dev/null; then
     curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz" | tar xz -C "$HOME/.local/bin"
 fi
 
+# Install lazygit
+if ! command -v lazygit &>/dev/null; then
+    echo "==> Installing lazygit..."
+    LAZYGIT_VERSION=$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
+    curl -sL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" | tar xz -C "$HOME/.local/bin" lazygit
+fi
+
 # Set zsh as default shell if available
 if command -v zsh &>/dev/null && [[ "$SHELL" != *"zsh"* ]]; then
     echo "==> Setting zsh as default shell..."
