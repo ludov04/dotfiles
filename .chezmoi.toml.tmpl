@@ -1,15 +1,15 @@
 {{- /* Environment detection */ -}}
-{{- $isDevpod := env "DEVPOD" | not | not -}}
 {{- $isMacOS := eq .chezmoi.os "darwin" -}}
 {{- $isLinux := eq .chezmoi.os "linux" -}}
+{{- $isRemote := or (env "DEVPOD") (env "REMOTE_CONTAINERS") (env "CODESPACES") (env "GITPOD_WORKSPACE_ID") $isLinux -}}
 
 [data]
-    isDevpod = {{ $isDevpod }}
     isMacOS = {{ $isMacOS }}
     isLinux = {{ $isLinux }}
+    isRemote = {{ $isRemote }}
 
     # Feature flags based on environment
-    hasHomebrew = {{ and $isMacOS (not $isDevpod) }}
-    has1Password = {{ and $isMacOS (not $isDevpod) }}
-    hasGui = {{ and $isMacOS (not $isDevpod) }}
-    hasMise = {{ not $isDevpod }}
+    hasHomebrew = {{ and $isMacOS (not $isRemote) }}
+    has1Password = {{ and $isMacOS (not $isRemote) }}
+    hasGui = {{ and $isMacOS (not $isRemote) }}
+    hasMise = {{ not $isRemote }}

@@ -64,17 +64,22 @@ fi
 # -----------------------------------------------------------------------------
 # Zsh plugins (Linux locations)
 # -----------------------------------------------------------------------------
-# Try common Linux plugin locations
-for dir in /usr/share /usr/local/share "$HOME/.local/share"; do
-    if [[ -f "$dir/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-        source "$dir/zsh-autosuggestions/zsh-autosuggestions.zsh"
+# Autosuggestions
+for f in /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
+         /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh \
+         "$HOME/.local/share/zsh-autosuggestions/zsh-autosuggestions.zsh"; do
+    if [[ -f "$f" ]]; then
+        source "$f"
         break
     fi
 done
 
-for dir in /usr/share /usr/local/share "$HOME/.local/share"; do
-    if [[ -f "$dir/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-        source "$dir/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+# Syntax highlighting (must be last!)
+for f in /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
+         /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
+         "$HOME/.local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"; do
+    if [[ -f "$f" ]]; then
+        source "$f"
         break
     fi
 done

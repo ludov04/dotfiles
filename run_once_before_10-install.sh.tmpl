@@ -16,6 +16,8 @@ mkdir -p "$HOME/.local/state/zsh"
 mkdir -p "$HOME/.local/bin"
 mkdir -p "$HOME/.cache/zsh"
 
+export PATH="$HOME/.local/bin:$PATH"
+
 {{- if .hasHomebrew }}
 # -----------------------------------------------------------------------------
 # macOS: Install Homebrew if not present
@@ -35,50 +37,67 @@ if [[ -f "{{ .chezmoi.sourceDir }}/Brewfile" ]]; then
 fi
 {{- end }}
 
-{{- if .isDevpod }}
+{{- if .isRemote }}
 # -----------------------------------------------------------------------------
-# Devpod: Install minimal tools
+# Remote/Linux: Install tools
 # -----------------------------------------------------------------------------
-echo "==> Devpod environment detected, installing minimal tools..."
+echo "==> Remote environment detected, installing tools..."
 
+# Install base packages via apt
 if command -v apt-get &>/dev/null; then
+    echo "==> Installing apt packages..."
     sudo apt-get update -qq
     sudo apt-get install -y --no-install-recommends \
         curl \
+        wget \
         git \
         zsh \
+        tmux \
         fzf \
         ripgrep \
-        jq
+        fd-find \
+        jq \
+        zsh-autosuggestions \
+        zsh-syntax-highlighting \
+        || true
 
-    # Install bat (Debian/Ubuntu names it batcat)
-    if ! command -v bat &>/dev/null && ! command -v batcat &>/dev/null; then
-        sudo apt-get install -y bat
-        [[ -f /usr/bin/batcat ]] && sudo ln -sf /usr/bin/batcat /usr/local/bin/bat
+    # Create fd symlink (Debian names it fdfind)
+    if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
+        sudo ln -sf "$(which fdfind)" /usr/local/bin/fd
+    fi
+
+    # Install bat (Debian names it batcat)
+    if ! command -v bat &>/dev/null; then
+        sudo apt-get install -y bat || true
+        if command -v batcat &>/dev/null; then
+            sudo ln -sf "$(which batcat)" /usr/local/bin/bat
+        fi
     fi
 fi
 
-# Install starship
+# Install starship (cross-platform prompt)
 if ! command -v starship &>/dev/null; then
     echo "==> Installing starship..."
-    curl -sS https://starship.rs/install.sh | sh -s -- -y
+    curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
 fi
 
-# Install eza
-if ! command -v eza &>/dev/null && command -v apt-get &>/dev/null; then
-    echo "==> Installing eza..."
-    sudo mkdir -p /etc/apt/keyrings
-    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | \
-        sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg 2>/dev/null || true
-    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | \
-        sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null
-    sudo apt-get update -qq && sudo apt-get install -y eza
-fi
-
-# Install zoxide
+# Install zoxide (smarter cd)
 if ! command -v zoxide &>/dev/null; then
     echo "==> Installing zoxide..."
     curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+fi
+
+# Install eza (modern ls)
+if ! command -v eza &>/dev/null; then
+    echo "==> Installing eza..."
+    EZA_VERSION=$(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep tag_name | cut -d '"' -f 4)
+    curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz" | tar xz -C "$HOME/.local/bin"
+fi
+
+# Set zsh as default shell if available
+if command -v zsh &>/dev/null && [[ "$SHELL" != *"zsh"* ]]; then
+    echo "==> Setting zsh as default shell..."
+    sudo chsh -s "$(which zsh)" "$(whoami)" 2>/dev/null || true
 fi
 {{- end }}
 
