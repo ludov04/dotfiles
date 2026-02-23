@@ -57,9 +57,16 @@ if command -v apt-get &>/dev/null; then
         ripgrep \
         fd-find \
         jq \
+        locales \
         zsh-autosuggestions \
         zsh-syntax-highlighting \
         || true
+
+    # Generate UTF-8 locale (needed for unicode in prompt/tools)
+    if command -v locale-gen &>/dev/null; then
+        sudo sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen 2>/dev/null || true
+        sudo locale-gen en_US.UTF-8 2>/dev/null || true
+    fi
 
     # Create fd symlink (Debian names it fdfind)
     if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
