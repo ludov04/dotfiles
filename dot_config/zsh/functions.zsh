@@ -86,3 +86,49 @@ pnpm-run() {
 pnpm-tree() {
     pnpm why "$1" --depth=10
 }
+
+# -----------------------------------------------------------------------------
+# AWS CLI profile switching
+# Native equivalents of oh-my-zsh's aws plugin (we don't run oh-my-zsh).
+# The active profile shows in the prompt via starship's [aws] module.
+# Profiles come from ~/.aws/config (SSO) - no static keys needed.
+# -----------------------------------------------------------------------------
+
+# List configured profiles
+aws-profiles() {
+    aws configure list-profiles 2>/dev/null
+}
+
+# agp - "aws get profile": print the active profile
+agp() {
+    echo "${AWS_PROFILE:-default}"
+}
+
+# asp - "aws set profile": set AWS_PROFILE for the current shell.
+#   asp <profile>   set the given profile
+#   asp             pick interactively with fzf (if installed)
+#   asp -u          clear the active profile
+asp() {
+    if [[ "$1" == "-u" || "$1" == "--unset" ]]; then
+        unset AWS_PROFILE AWS_DEFAULT_PROFILE AWS_EB_PROFILE
+        return
+    fi
+    local profile="$1"
+    if [[ -z "$profile" ]]; then
+        command -v fzf &>/dev/null || { echo "usage: asp <profile> | asp -u"; return 1; }
+        profile=$(aws-profiles | fzf --height=40% --reverse --header="Select AWS profile") || return
+    fi
+    [[ -z "$profile" ]] && return
+    export AWS_PROFILE="$profile"
+    export AWS_DEFAULT_PROFILE="$profile"
+}
+
+# Tab-completion for `asp` from configured profiles
+if (( $+functions[compdef] )); then
+    _asp() {
+        local -a profiles
+        profiles=(${(f)"$(aws configure list-profiles 2>/dev/null)"})
+        compadd -a profiles
+    }
+    compdef _asp asp
+fi

@@ -44,7 +44,8 @@ cd ~/dotfiles
 - **Shell**: zsh with XDG structure
 - **Prompt**: [Starship](https://starship.rs/)
 - **Version Manager**: [mise](https://mise.jdx.dev/) (node, go, python, etc.)
-- **Package Manager**: Homebrew (macOS)
+- **Package Manager**: Homebrew — on macOS *and* remote Linux (Linuxbrew). CLI
+  tools live in `Brewfile`; macOS-only GUI apps/casks/fonts in `Brewfile.macos`.
 
 ## Manual Setup (not in dotfiles)
 

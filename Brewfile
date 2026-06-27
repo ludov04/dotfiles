@@ -1,10 +1,15 @@
 # =============================================================================
-# Brewfile - Homebrew Bundle
+# Brewfile - Homebrew Bundle (cross-platform CLI tools)
 # Install with: brew bundle --file=~/dotfiles/Brewfile
+#
+# This file is shared by macOS and remote Linux. GUI apps / fonts live in
+# Brewfile.macos and are only installed on macOS.
 # =============================================================================
 
+# -----------------------------------------------------------------------------
 # Taps
-# Note: homebrew/bundle is now built-in, no tap needed
+# -----------------------------------------------------------------------------
+tap "hashicorp/tap"   # current terraform (homebrew-core's is frozen at 1.5.7)
 
 # -----------------------------------------------------------------------------
 # Core CLI Tools
@@ -46,48 +51,25 @@ brew "httpie"         # HTTP client
 # -----------------------------------------------------------------------------
 brew "awscli"         # AWS CLI
 brew "eksctl"         # EKS CLI
-brew "helm"           # Kubernetes package manager
-brew "k9s"            # Kubernetes TUI
 brew "docker-compose" # Docker Compose
 brew "pnpm"           # Fast npm alternative
 
+# Kubernetes
+brew "kubernetes-cli" # kubectl
+brew "helm"           # Kubernetes package manager
+brew "k9s"            # Kubernetes TUI
+
+# Infrastructure as code
+brew "hashicorp/tap/terraform" # Terraform
+brew "pulumi"         # Pulumi IaC
+
 # Cloud & Infrastructure
 brew "cloudflared"    # Cloudflare tunnel
-brew "pulumi"         # Infrastructure as code
 brew "coder"          # Remote development
 
 # AI Tools
 brew "aichat"         # AI chat CLI
+brew "herdr"          # Agent multiplexer in the terminal (installs its Claude hook)
 
 # Media
 brew "ffmpeg"         # Video/audio processing
-
-# -----------------------------------------------------------------------------
-# Fonts (Nerd Fonts for terminal icons)
-# -----------------------------------------------------------------------------
-cask "font-jetbrains-mono-nerd-font"
-cask "font-fira-code-nerd-font"
-
-# -----------------------------------------------------------------------------
-# GUI Applications (Casks)
-# -----------------------------------------------------------------------------
-cask "1password"
-cask "1password-cli"
-cask "arc"
-cask "discord"
-cask "docker"
-cask "ghostty"
-cask "linear-linear"
-cask "notion"
-cask "raycast"
-cask "rectangle"
-cask "slack"
-cask "tailscale"
-cask "telegram"
-cask "visual-studio-code"
-cask "vlc"
-cask "zoom"
-
-
-# Google Cloud (uncomment if needed)
-# cask "google-cloud-sdk"

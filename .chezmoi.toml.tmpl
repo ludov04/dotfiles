@@ -9,7 +9,8 @@
     isRemote = {{ $isRemote }}
 
     # Feature flags based on environment
-    hasHomebrew = {{ and $isMacOS (not $isRemote) }}
+    # Homebrew now manages CLI tools on macOS *and* remote Linux (Linuxbrew)
+    hasHomebrew = true
     has1Password = {{ and $isMacOS (not $isRemote) }}
     hasGui = {{ and $isMacOS (not $isRemote) }}
-    hasMise = {{ not $isRemote }}
+    hasMise = true

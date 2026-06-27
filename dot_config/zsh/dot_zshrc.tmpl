@@ -14,11 +14,15 @@ export PATH="$HOME/.local/bin:$PATH"
 
 {{- if .hasHomebrew }}
 # -----------------------------------------------------------------------------
-# Homebrew (must be first for PATH)
+# Homebrew (must be first for PATH) - macOS /opt, Linuxbrew /home/linuxbrew
 # -----------------------------------------------------------------------------
-if [[ -f /opt/homebrew/bin/brew ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
+for brew_bin in /opt/homebrew/bin/brew /usr/local/bin/brew \
+                /home/linuxbrew/.linuxbrew/bin/brew "$HOME/.linuxbrew/bin/brew"; do
+    if [[ -x "$brew_bin" ]]; then
+        eval "$("$brew_bin" shellenv)"
+        break
+    fi
+done
 {{- end }}
 
 {{- if .hasMise }}
@@ -55,39 +59,17 @@ fi
 {{- if .hasHomebrew }}
 # -----------------------------------------------------------------------------
 # Zsh plugins (via Homebrew) - AFTER completions.zsh sets strategies
+# HOMEBREW_PREFIX is set by `brew shellenv` above (works on macOS + Linuxbrew)
 # -----------------------------------------------------------------------------
 # Autosuggestions (shows inline suggestions from history)
-if [[ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-    source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [[ -f "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 fi
 
 # Fast syntax highlighting (better than zsh-syntax-highlighting - must be last!)
-if [[ -f /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
-    source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+if [[ -f "$HOMEBREW_PREFIX/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ]]; then
+    source "$HOMEBREW_PREFIX/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
 fi
-{{- else }}
-# -----------------------------------------------------------------------------
-# Zsh plugins (Linux locations)
-# -----------------------------------------------------------------------------
-# Autosuggestions
-for f in /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
-         /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh \
-         "$HOME/.local/share/zsh-autosuggestions/zsh-autosuggestions.zsh"; do
-    if [[ -f "$f" ]]; then
-        source "$f"
-        break
-    fi
-done
-
-# Syntax highlighting (must be last!)
-for f in /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
-         /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
-         "$HOME/.local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"; do
-    if [[ -f "$f" ]]; then
-        source "$f"
-        break
-    fi
-done
 {{- end }}
 
 {{- if .has1Password }}

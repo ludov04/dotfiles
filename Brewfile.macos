@@ -1,0 +1,35 @@
+# =============================================================================
+# Brewfile.macos - macOS-only Homebrew Bundle (GUI apps, casks, fonts)
+# Install with: brew bundle --file=~/dotfiles/Brewfile.macos
+#
+# Run in addition to the shared Brewfile. Not used on remote Linux.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Fonts (Nerd Fonts for terminal icons)
+# -----------------------------------------------------------------------------
+cask "font-jetbrains-mono-nerd-font"
+cask "font-fira-code-nerd-font"
+
+# -----------------------------------------------------------------------------
+# GUI Applications (Casks)
+# -----------------------------------------------------------------------------
+cask "1password"
+cask "1password-cli"
+cask "arc"
+cask "discord"
+cask "docker"
+cask "ghostty"
+cask "linear-linear"
+cask "notion"
+cask "raycast"
+cask "rectangle"
+cask "slack"
+cask "tailscale"
+cask "telegram"
+cask "visual-studio-code"
+cask "vlc"
+cask "zoom"
+
+# Google Cloud (uncomment if needed)
+# cask "google-cloud-sdk"

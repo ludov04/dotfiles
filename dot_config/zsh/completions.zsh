@@ -87,13 +87,16 @@ bindkey '^N' down-line-or-beginning-search    # Ctrl+N
 # -----------------------------------------------------------------------------
 # fzf integration (fuzzy finder)
 # -----------------------------------------------------------------------------
-if [[ -f /opt/homebrew/opt/fzf/shell/completion.zsh ]]; then
-    source /opt/homebrew/opt/fzf/shell/completion.zsh
+# Resolve fzf shell integration from Homebrew (macOS /opt or Linuxbrew)
+_fzf_prefix="${HOMEBREW_PREFIX:-/opt/homebrew}"
+if [[ -f "$_fzf_prefix/opt/fzf/shell/completion.zsh" ]]; then
+    source "$_fzf_prefix/opt/fzf/shell/completion.zsh"
 fi
 
-if [[ -f /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]]; then
-    source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+if [[ -f "$_fzf_prefix/opt/fzf/shell/key-bindings.zsh" ]]; then
+    source "$_fzf_prefix/opt/fzf/shell/key-bindings.zsh"
 fi
+unset _fzf_prefix
 
 # fzf settings
 export FZF_DEFAULT_OPTS="
