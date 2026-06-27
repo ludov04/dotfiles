@@ -35,3 +35,16 @@ Favor functional programming patterns:
 5. **Favor expressions over statements** - Prefer ternaries and logical expressions over if/else when the result is a value. Use early returns to flatten logic.
 
 6. **Leverage type inference** - Let TypeScript infer types from function composition rather than annotating everything explicitly.
+
+
+## AWS CLI Profiles
+
+This environment switches AWS profiles with shell helpers (native equivalents of oh-my-zsh's aws plugin):
+
+- `asp <profile>` — set `AWS_PROFILE` for the current shell (tab-completes configured profiles; `asp` alone opens an fzf picker; `asp -u` clears it).
+- `agp` — print the active profile.
+- `aws-profiles` — list configured profiles (`aws configure list-profiles`).
+
+Profiles use AWS SSO (`aws sso login`), not static keys. The active profile shows in the prompt via starship's `[aws]` module.
+
+When running AWS CLI commands, select the right profile first with `asp <profile>` (or pass `--profile <profile>` / set `AWS_PROFILE=<profile>` inline) and confirm with `agp` — don't assume the default profile. If a call fails with an auth/expired-token error, run `aws sso login` (with the right profile active).

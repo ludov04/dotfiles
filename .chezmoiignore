@@ -4,6 +4,7 @@ LICENSE
 .git/**
 .gitignore
 Brewfile
+Brewfile.macos
 install.sh
 install.sh.old
 install-remote.sh.old
@@ -13,10 +14,4 @@ install-remote.sh.old
 .config/ghostty/**
 .local/bin/macos-defaults
 .local/bin/macos-touchid-sudo
-{{- end }}
-
-# Remote: use devcontainer features instead of mise/claude
-{{- if .isRemote }}
-.config/mise/**
-.claude/**
 {{- end }}

@@ -14,6 +14,19 @@
     program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
 {{- end }}
 
+# -----------------------------------------------------------------------------
+# Keep Homebrew's git operations on HTTPS even when a global insteadOf rewrites
+# https://github.com/ -> SSH (e.g. Coder workspaces). Git uses the longest
+# matching insteadOf, so these identity mappings exempt the public orgs brew
+# pulls from (Homebrew brew/taps + hashicorp tap) so `brew update`/taps work.
+# Add a block here when adding a tap from a new org.
+# -----------------------------------------------------------------------------
+[url "https://github.com/Homebrew/"]
+    insteadOf = https://github.com/Homebrew/
+
+[url "https://github.com/hashicorp/"]
+    insteadOf = https://github.com/hashicorp/
+
 [init]
     defaultBranch = main
 

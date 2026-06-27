@@ -18,48 +18,24 @@ mkdir -p "$HOME/.cache/zsh"
 
 export PATH="$HOME/.local/bin:$PATH"
 
-{{- if .hasHomebrew }}
-# -----------------------------------------------------------------------------
-# macOS: Install Homebrew if not present
-# -----------------------------------------------------------------------------
-if ! command -v brew &>/dev/null; then
-    echo "==> Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
-
-# Install from Brewfile
-if [[ -f "{{ .chezmoi.sourceDir }}/Brewfile" ]]; then
-    echo "==> Installing Homebrew packages..."
-    brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile" || {
-        echo "==> Some packages failed to install (continuing anyway)"
-    }
-fi
-{{- end }}
-
 {{- if .isRemote }}
 # -----------------------------------------------------------------------------
-# Remote/Linux: Install tools
+# Remote/Linux: bootstrap prerequisites for Homebrew (Linuxbrew)
+# Everything else is installed through brew, same as macOS.
 # -----------------------------------------------------------------------------
-echo "==> Remote environment detected, installing tools..."
-
-# Install base packages via apt
 if command -v apt-get &>/dev/null; then
-    echo "==> Installing apt packages..."
+    echo "==> Installing Homebrew prerequisites via apt..."
     sudo apt-get update -qq
+    # build-essential/procps/curl/file/git are Homebrew's documented Linux deps;
+    # zsh is the login shell (set below), locales gives us UTF-8.
     sudo apt-get install -y --no-install-recommends \
+        build-essential \
+        procps \
         curl \
-        wget \
+        file \
         git \
         zsh \
-        tmux \
-        fzf \
-        ripgrep \
-        fd-find \
-        jq \
         locales \
-        zsh-autosuggestions \
-        zsh-syntax-highlighting \
         || true
 
     # Generate UTF-8 locale (needed for unicode in prompt/tools)
@@ -67,79 +43,71 @@ if command -v apt-get &>/dev/null; then
         sudo sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen 2>/dev/null || true
         sudo locale-gen en_US.UTF-8 2>/dev/null || true
     fi
+fi
+{{- end }}
 
-    # Create fd symlink (Debian names it fdfind)
-    if command -v fdfind &>/dev/null && ! command -v fd &>/dev/null; then
-        sudo ln -sf "$(which fdfind)" /usr/local/bin/fd
+# -----------------------------------------------------------------------------
+# Install Homebrew (macOS + remote Linux) and load it into this shell
+# -----------------------------------------------------------------------------
+# Homebrew clones its repo + taps over HTTPS. If a global git `insteadOf`
+# rewrites https://github.com/ -> SSH (e.g. Coder workspaces), brew's internal
+# git can't use that SSH path and `brew update`/tap clones fail. Git uses the
+# LONGEST matching insteadOf, so identity mappings for the public orgs brew
+# pulls from keep those on HTTPS without touching the global SSH-everywhere
+# policy. Idempotent. Add a line here when adding a tap from a new org.
+if command -v git &>/dev/null; then
+    for org in Homebrew hashicorp; do
+        git config --global "url.https://github.com/${org}/.insteadOf" \
+            "https://github.com/${org}/"
+    done
+fi
+
+if ! command -v brew &>/dev/null; then
+    echo "==> Installing Homebrew..."
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+# Load brew into PATH from whichever prefix it landed in
+for brew_bin in /opt/homebrew/bin/brew /usr/local/bin/brew \
+                /home/linuxbrew/.linuxbrew/bin/brew "$HOME/.linuxbrew/bin/brew"; do
+    if [[ -x "$brew_bin" ]]; then
+        eval "$("$brew_bin" shellenv)"
+        break
     fi
+done
 
-    # Install bat (Debian names it batcat)
-    if ! command -v bat &>/dev/null; then
-        sudo apt-get install -y bat || true
-        if command -v batcat &>/dev/null; then
-            sudo ln -sf "$(which batcat)" /usr/local/bin/bat
-        fi
-    fi
+# Third-party taps must be trusted before brew will load their formulae.
+# Tap + trust up front so `brew bundle` runs non-interactively.
+if command -v brew &>/dev/null; then
+    brew tap hashicorp/tap 2>/dev/null || true
+    brew trust hashicorp/tap 2>/dev/null || true
 fi
 
-# Install starship (cross-platform prompt)
-if ! command -v starship &>/dev/null; then
-    echo "==> Installing starship..."
-    curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
-fi
-
-# Install zoxide (smarter cd)
-if ! command -v zoxide &>/dev/null; then
-    echo "==> Installing zoxide..."
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-fi
-
-# Detect architecture
-ARCH=$(uname -m)
-case "$ARCH" in
-    x86_64)  ARCH_ALT="x86_64"; ARCH_GO="amd64" ;;
-    aarch64) ARCH_ALT="aarch64"; ARCH_GO="arm64" ;;
-    arm64)   ARCH_ALT="aarch64"; ARCH_GO="arm64" ;;
-    *)       ARCH_ALT="$ARCH"; ARCH_GO="$ARCH" ;;
-esac
-
-# Install eza (modern ls)
-if ! command -v eza &>/dev/null; then
-    echo "==> Installing eza..."
-    EZA_VERSION=$(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep tag_name | cut -d '"' -f 4)
-    curl -sL "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_${ARCH_ALT}-unknown-linux-gnu.tar.gz" | tar xz -C "$HOME/.local/bin" 2>/dev/null || {
-        echo "==> eza binary not available for $ARCH, skipping"
+# Install shared CLI tools from the Brewfile
+if command -v brew &>/dev/null && [[ -f "{{ .chezmoi.sourceDir }}/Brewfile" ]]; then
+    echo "==> Installing Homebrew packages (Brewfile)..."
+    brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile" || {
+        echo "==> Some packages failed to install (continuing anyway)"
     }
 fi
 
-# Install lazygit
-if ! command -v lazygit &>/dev/null; then
-    echo "==> Installing lazygit..."
-    LAZYGIT_VERSION=$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
-    LAZYGIT_ARCH=$([ "$ARCH" = "x86_64" ] && echo "x86_64" || echo "arm64")
-    curl -sL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_${LAZYGIT_ARCH}.tar.gz" | tar xz -C "$HOME/.local/bin" lazygit 2>/dev/null || {
-        echo "==> lazygit binary not available for $ARCH, skipping"
+{{- if .hasGui }}
+# macOS-only GUI apps, casks and fonts
+if command -v brew &>/dev/null && [[ -f "{{ .chezmoi.sourceDir }}/Brewfile.macos" ]]; then
+    echo "==> Installing macOS Homebrew apps (Brewfile.macos)..."
+    brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile.macos" || {
+        echo "==> Some apps failed to install (continuing anyway)"
     }
 fi
+{{- end }}
 
-# Install GitHub CLI
-if ! command -v gh &>/dev/null; then
-    echo "==> Installing GitHub CLI..."
-    curl -sL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
-    sudo apt-get update -qq && sudo apt-get install -y gh
-fi
-
-# Install direnv
-if ! command -v direnv &>/dev/null; then
-    echo "==> Installing direnv..."
-    curl -sfL https://direnv.net/install.sh | bash
-fi
-
-# Set zsh as default shell if available
+{{- if .isRemote }}
+# -----------------------------------------------------------------------------
+# Remote/Linux: make zsh the default shell
+# -----------------------------------------------------------------------------
 if command -v zsh &>/dev/null && [[ "$SHELL" != *"zsh"* ]]; then
     echo "==> Setting zsh as default shell..."
-    sudo chsh -s "$(which zsh)" "$(whoami)" 2>/dev/null || true
+    sudo chsh -s "$(command -v zsh)" "$(whoami)" 2>/dev/null || true
 fi
 {{- end }}
 
