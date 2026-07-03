@@ -94,3 +94,18 @@ case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
+
+# -----------------------------------------------------------------------------
+# Coder workspace: neutralize the stale agent token
+# -----------------------------------------------------------------------------
+# On the EC2 (Superset) template, /etc/superset/coder-env is re-sourced into every
+# login shell via /etc/zsh/zprofile and re-exports a CODER_AGENT_TOKEN captured at
+# boot. The agent actually authenticates via aws-instance-identity, so the server
+# rotates that token and the frozen copy goes stale, making `coder gitssh` fail with
+# "Workspace agent not authorized" (breaks git over SSH). This runs after zprofile,
+# so drop the stale token and pin the agent's real auth mode. Guarded to Coder boxes;
+# harmless no-op once the template publishes CODER_AGENT_AUTH instead of the token.
+if [[ -n "$CODER_AGENT_URL" ]]; then
+  unset CODER_AGENT_TOKEN
+  export CODER_AGENT_AUTH=aws-instance-identity
+fi
